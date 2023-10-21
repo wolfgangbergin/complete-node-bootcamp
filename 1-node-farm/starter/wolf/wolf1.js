@@ -1,4 +1,5 @@
 //The avocado 🥑 is popular in vegetarian cuisine as a substitute for meats in sandwiches and salads because of its high fat content 😄
+this.l = console.log;
 const fs = require('fs');
 const http = require('http');
 const url = require('url');
@@ -11,13 +12,13 @@ const url = require('url');
 // const testOut = `${temp1}  414`;
 // fs.writeFileSync('./txt/output.txt', testOut);
 
-// let temp2;
+// let jsonDataArray;
 // fs.readFile('./txt/output.txt', 'utf8', (err, data) => {
-//   temp2 = data;
+//   jsonDataArray = data;
 // });
 
 // setTimeout(() => {
-//   fs.writeFile('./txt/kim.txt', `${temp2}  🥑 `, (err, data) => {});
+//   fs.writeFile('./txt/kim.txt', `${jsonDataArray}  🥑 `, (err, data) => {});
 // }, 100);
 
 // let temp3;
@@ -66,27 +67,98 @@ const url = require('url');
 ///////////////////////////////////////////////
 // Server
 
-const jsonData = (() => {
-  try {
-    const __wolfDirName =
-      '/Users/bob/Desktop/node/complete-node-bootcamp/1-node-farm/starter';
+const __wolfDirName =
+  '/Users/bob/Desktop/node/complete-node-bootcamp/1-node-farm/starter';
 
-    return fs.readFileSync(`${__wolfDirName}/dev-data/data.json`, 'utf8');
-  } catch (err) {
-    console.log('error in jsonData');
+const jsonDataString = fs.readFileSync(
+  `${__wolfDirName}/dev-data/data.json`,
+  'utf8'
+);
+
+const tempCard = fs.readFileSync(
+  `${__wolfDirName}/templates/template-card.html`,
+  'utf8'
+);
+const tempProduct = fs.readFileSync(
+  `${__wolfDirName}/templates/template-product.html`,
+  'utf8'
+);
+///////////////////////////////////////////////
+
+this.wolfman = {
+  tempOverview: fs.readFileSync(
+    `${__wolfDirName}/templates/template-overview.html`,
+    'utf8'
+  ),
+};
+
+///////////////////////////////////////////////
+const replaceTemplate = (temp, product) => {
+  let output = temp.replace(/{%name%}/g, product.productName);
+  output = output.replace(/{%image%}/g, product.image);
+  output = output.replace(/{%price%}/g, product.price);
+  output = output.replace(/{%from%}/g, product.from);
+  output = output.replace(/{%v%}/g, product.nutrients);
+  output = output.replace(/{%q%}/g, product.quantity);
+  output = output.replace(/{%d%}/g, product.description);
+  output = output.replace(/{%ID%}/g, product.id);
+
+  if (!product.organic) {
+    output = output.replace(/{%not_organic%}/g, 'not-organic');
   }
-})();
+  return output;
+};
+////
+
+const jsonDataArray = JSON.parse(jsonDataString);
 
 ///////////////////////////////////////////////
 
 const server = http.createServer((req, res) => {
-  console.log(req.url);
+  
+  let path = url.parse(req.url, true);
+
+
+const queryID = url.parse(req.url, true).query.id;
+
+  
   const pathName = req.url;
+  const search = `${path.pathname}${path.search}`;
+  
+  
+const {query, pathname} = url.parse(req.url, true)
+
+this.l(query)
+this.l(pathname)
+this.l(`${pathname}?id=${query.id}`)
+
   if (pathName === '/' || pathName === '/overview') {
-    res.end('This is the OVERVIEW of wolfs server!!!');
+    fs.readFile(
+      `${__wolfDirName}/templates/template-card.html`,
+      'utf8',
+      (err, tempCard) => {
+        if (err)
+          return console.log(`error 💥💥💥💥💥💥💥💥💥💥💥💥💥💥💥💥💥💥`);
+
+        res.writeHead(200, { 'Content-type': 'text/html' });
+
+        const cardHtmlString = jsonDataArray
+          .map((el) => replaceTemplate(tempCard, el))
+          .join('');
+
+        res.end(
+          this.wolfman.tempOverview.replace(/{%produtCards%}/g, cardHtmlString)
+        );
+      }
+    );
+  } else if (pathName === `${pathname}?id=${query.id}`) {
+  
+
+    res.end(replaceTemplate(tempProduct, jsonDataArray[query.id]));
+   
   } else if (pathName === '/api') {
     res.writeHead(200, { 'Content-type': 'application/json' });
-    res.end(jsonData);
+    res.end(jsonDataString);
   } else if (pathName === '/product') {
     res.end('templates/product.html');
   } else {
