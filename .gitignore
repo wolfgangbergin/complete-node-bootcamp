@@ -1,0 +1,8 @@
+
+!.gitignore
+
+1-node-farm/starter/node_modules/
+
+
+.DS_Store
+
