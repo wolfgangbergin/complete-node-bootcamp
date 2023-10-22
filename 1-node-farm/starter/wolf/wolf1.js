@@ -1,5 +1,8 @@
 //The avocado 🥑 is popular in vegetarian cuisine as a substitute for meats in sandwiches and salads because of its high fat content 😄
-this.l = console.log;
+
+globalThis.l = console.log;
+
+const { gl } = require('date-fns/locale');
 const fs = require('fs');
 const http = require('http');
 const url = require('url');
@@ -112,27 +115,15 @@ const replaceTemplate = (temp, product) => {
 
 const jsonDataArray = JSON.parse(jsonDataString);
 
+l(this)
 ///////////////////////////////////////////////
 
 const server = http.createServer((req, res) => {
-  
-  let path = url.parse(req.url, true);
-
-
-const queryID = url.parse(req.url, true).query.id;
-
-  
   const pathName = req.url;
-  const search = `${path.pathname}${path.search}`;
-  
-  
-const {query, pathname} = url.parse(req.url, true)
 
-this.l(query)
-this.l(pathname)
-this.l(`${pathname}?id=${query.id}`)
+  const { query, pathname } = url.parse(req.url, true);
 
-  if (pathName === '/' || pathName === '/overview') {
+  if (pathname === '/' || pathname === '/overview') {
     fs.readFile(
       `${__wolfDirName}/templates/template-card.html`,
       'utf8',
@@ -151,16 +142,12 @@ this.l(`${pathname}?id=${query.id}`)
         );
       }
     );
-  } else if (pathName === `${pathname}?id=${query.id}`) {
-  
-
+  } else if (pathname === '/product') {
+    res.writeHead(200, { 'Content-type': 'text/html' });
     res.end(replaceTemplate(tempProduct, jsonDataArray[query.id]));
-   
-  } else if (pathName === '/api') {
+  } else if (pathname === '/api') {
     res.writeHead(200, { 'Content-type': 'application/json' });
     res.end(jsonDataString);
-  } else if (pathName === '/product') {
-    res.end('templates/product.html');
   } else {
     res.writeHead(404, {
       'Content-type': 'text/html',
