@@ -1,7 +1,7 @@
 
 !.gitignore
 
-1-node-farm/starter/node_modules/
+node_modules
 
 
 .DS_Store
